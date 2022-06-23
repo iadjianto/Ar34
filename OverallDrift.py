@@ -7,18 +7,20 @@ from sympy import Symbol
 abso_path = "C:/Users/Isaiah/Documents/Python Scripts/"
 name = "drift_pid_0.txt"
 
+# Script is meant to onserve effects of detector energy drifting over time/runs and fit coefficients to correct energy drift.
+
 def thefunc (x,a0,a1,a2,a3,a4,a5):
 	return a0 + a1*x + a2*x**2 + a3*x**3 + a4*x**4 + a5*x**5
 
-class coefficients:
+class coefficients: #used to calculate coefficients to modify energy based on peaks fitted in C++/ROOT
 
 	def __init__(self,fitted,reffed):
 		self.x = fitted
 		self.y = reffed 
 
-		self.coeff,self.coeff_cov = curve_fit(thefunc,self.x,self.y) # (f(x),x,y)
+		self.coeff,self.coeff_cov = curve_fit(thefunc,self.x,self.y) # (f(x),x,y) # Find coefficients to calibrate peak energies relative to referenced energies
 
-	def plot(self):
+	def plot(self): #Plot fitted peaks
 		domain = np.linspace(5000,0,5000)
 
 		print(self.coeff)
@@ -37,7 +39,7 @@ class coefficients:
 		plt.plot(domain,thefunc(domain,*self.coeff))
 		plt.show()
 
-	def write_coeff(self,path,run,detector = 16):
+	def write_coeff(self,path,run,detector = 16): # Fitted peaks will be written to a lookup table along with their coefficients.
 		# print("{}".format(int(run)))
 		with open(path+"LUT_GALILEO_{0}.dat".format(int(run)),"w") as new_file:
 			with open(path+"LUT_GALILEO.dat","r") as old_file:
@@ -52,7 +54,7 @@ class coefficients:
 						new_file.write(line)
 
 
-class data:
+class data: # Used to show fitted peaks and energy calibrated peaks against run number
 
 	def __init__(self,path):
 		self.run = []
